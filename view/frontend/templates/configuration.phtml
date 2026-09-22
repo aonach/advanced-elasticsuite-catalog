@@ -3,10 +3,14 @@
 use Magento\Framework\Escaper;
 use Shellpea\AdvancedElasticsuiteCatalog\Block\AdvancedCatalog;
 use Hyva\Theme\ViewModel\StoreConfig;
+use Hyva\Theme\ViewModel\HyvaCsp;
 
 /** @var Escaper $escaper */
 /** @var AdvancedCatalog $block */
 /** @var StoreConfig $storeConfig */
+/** @var HyvaCsp $hyvaCsp */
+
+
 $storeConfig = $viewModels->require(StoreConfig::class);
 
 /** @var bool $isEnableInfinite */
@@ -259,7 +263,6 @@ $isEnableInfinite = $storeConfig->getStoreConfig('smile_advanced_elasticsuite_ca
 
                 const filteredItems = Array.from(newSlidersContent)
                     .filter(item => sliderItems.includes(item.dataset.filterName));
-                console.log(filteredItems);
                 filteredItems.map(item => {
                     const slider = document.querySelector(`[data-filter-name=${item.dataset.filterName}]`)
                     slider.replaceWith(item);
@@ -268,7 +271,6 @@ $isEnableInfinite = $storeConfig->getStoreConfig('smile_advanced_elasticsuite_ca
             },
             async replaceFilterItems(response) {
                 const currentFiltersList = this.getMultipleFilterValues();
-                console.log(currentFiltersList);
 
                 const newFiltersContent = new DOMParser().parseFromString(response.listFilterOptions, 'text/html')
                     .querySelectorAll('.filter-content .filter-option');
@@ -300,3 +302,4 @@ $isEnableInfinite = $storeConfig->getStoreConfig('smile_advanced_elasticsuite_ca
         })
     })
 </script>
+<?php $hyvaCsp->registerInlineScript() ?>

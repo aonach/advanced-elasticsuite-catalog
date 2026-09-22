@@ -13,6 +13,8 @@ use Smile\ElasticsuiteCatalog\Block\Navigation;
 use Smile\ElasticsuiteCatalog\Model\Layer\Filter\Attribute;
 use Smile\ElasticsuiteSwatches\Helper\Swatches;
 use Magento\Catalog\Model\Layer\Filter\Item as FilterItem;
+use Magento\Catalog\Model\Layer\Filter\FilterInterface;
+use Magento\Catalog\Model\ResourceModel\Eav\Attribute as EavAttribute;
 use Magento\Swatches\Helper\Media;
 
 class AjaxResponse
@@ -205,7 +207,7 @@ class AjaxResponse
         return $items;
     }
 
-    private function processFilter($filter): array
+    private function processFilter(FilterInterface $filter): array
     {
         $items = [];
         $datascope = $filter->getRequestVar() . 'Filter';
@@ -219,7 +221,7 @@ class AjaxResponse
         return $items;
     }
 
-    private function processAttributeFilter($filter): array
+    private function processAttributeFilter(Attribute $filter): array
     {
         $items = [];
         $attribute = $filter->getAttributeModel();
@@ -232,13 +234,18 @@ class AjaxResponse
 
         return $items;
     }
-    private function processSwatchAttributeFilter($filter, $attribute): array
+    private function processSwatchAttributeFilter(Attribute $filter, EavAttribute $attribute): array
     {
         $items = [];
 
         foreach ($filter->getItems() as $item) {
             $resultOption = $this->getResultOption($item, $attribute);
             $attributeOptionId = $this->swatchHelper->getOptionIds($attribute, $item['label']);
+
+            if (empty($attributeOptionId)) {
+                continue;
+            }
+
             $swatchData = $this->swatchHelper->getSwatchesByOptionsId($attributeOptionId);
             $swatchThumbPath = $this->mediaHelper->getSwatchAttributeImage('swatch_thumb', $swatchData[$attributeOptionId[0]]['value']);
             $swatchImagePath = $this->mediaHelper->getSwatchAttributeImage('swatch_image', $swatchData[$attributeOptionId[0]]['value']);
@@ -258,7 +265,7 @@ class AjaxResponse
         return $items;
     }
 
-    private function processNonSwatchAttributeFilter($filter): array
+    private function processNonSwatchAttributeFilter(Attribute $filter): array
     {
         $items = [];
 
@@ -269,7 +276,7 @@ class AjaxResponse
         return $items;
     }
 
-    private function processNonAttributeFilter($filter): array
+    private function processNonAttributeFilter(FilterInterface $filter): array
     {
         $items = [];
 
@@ -284,7 +291,7 @@ class AjaxResponse
         return $items;
     }
 
-    private function getResultOption($item, $attribute): array|bool
+    private function getResultOption(FilterItem $item, EavAttribute $attribute): array|bool
     {
         if ($this->isShowEmptyResults($attribute)) {
             return $this->getUnusedOption($item);
